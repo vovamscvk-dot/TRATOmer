@@ -17,81 +17,78 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap">
 <style>
 :root{
-  --page:#0E0E10; --card:#151517; --card-hi:#1C1C1F; --line:#26262A;
+  --page:#0E0E10; --card:#151517; --card-hi:#1C1C1F; --line:#26262A; --dim:#1D1D21; --bar:#3A3A40;
   --text:#F2F2F3; --muted:#8A8A90;
-  --gold:#D9B45B; --good:#D9B45B; --warn:#FF8A3D; --bad:#FF4D4D;
+  --gold:#D9B45B; --good:#4FD9A6; --warn:#FF8A3D; --bad:#FF4D4D;
   --state:var(--gold);
   --font:-apple-system,"SF Pro Display","SF Pro Text",BlinkMacSystemFont,"Manrope",system-ui,sans-serif;
   --r:20px;
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}   /* иначе display:flex у .blank/.hero перебивает скрытие */
 body{
-  margin:0;padding:clamp(14px,3vw,32px);
+  margin:0;padding:clamp(14px,3vw,28px);
   background:var(--page);color:var(--text);
   font:400 16px/1.5 var(--font);-webkit-font-smoothing:antialiased;
 }
-.app{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.app{max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
 header{display:flex;align-items:baseline;gap:10px;padding:2px 4px 0}
 header h1{font:800 1.15rem/1 var(--font);letter-spacing:-.02em;margin:0}
 header .m{margin-left:auto;color:var(--muted);font-size:.82rem}
 header .m::first-letter{text-transform:uppercase}
 
-.bento{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-.cell{
-  background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;min-width:0;
-  transition:transform .2s cubic-bezier(.2,.8,.2,1),background .2s;
-}
-.cell:hover{transform:translateY(-4px);background:var(--card-hi)}
-.span2{grid-column:span 2}.span4{grid-column:span 4}
-@media (max-width:760px){
-  .bento{grid-template-columns:repeat(2,1fr)}
-  .span4,.span2{grid-column:span 2}
-  /* на узком экране ужимаем карточку бюджета, чтобы «из N ₽» влезало */
-  .ring{width:44px;height:44px}
-  .ringwrap{gap:8px}
-}
+.cell{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;min-width:0}
+.hero{display:flex;flex-direction:column;gap:14px}
+.sep{padding-top:14px;border-top:1px solid var(--line)}
 
 .lbl{font:500 10px/1 var(--font);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
-.num{font:800 clamp(2.1rem,7vw,3.4rem)/1 var(--font);letter-spacing:-.03em;font-variant-numeric:tabular-nums;margin:10px 0 2px}
+.num{font:800 clamp(2.2rem,9vw,2.9rem)/1 var(--font);letter-spacing:-.03em;font-variant-numeric:tabular-nums;margin:10px 0 0}
+.sub{color:var(--muted);font-size:.82rem;margin-top:6px;display:flex;gap:5px;align-items:baseline;flex-wrap:wrap}
 
-/* ---- строка-комментатор (маскот) ---- */
-.quip{display:flex;align-items:center;gap:12px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.track{position:relative;height:10px;border-radius:999px;background:var(--line)}
+.track .fill{position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:var(--state);transition:width .4s ease,background .5s ease}
+.track .plan{position:absolute;top:-4px;bottom:-4px;width:2px;border-radius:2px;background:var(--text)}
+.track-cap{display:flex;font-size:.72rem;color:var(--muted);margin-top:7px;gap:8px}
+.track-cap .right{margin-left:auto;color:var(--state);transition:color .5s ease;text-align:right}
+
+.tops{display:flex;flex-direction:column;gap:9px}
+.top{display:flex;align-items:center;gap:9px;font-size:.85rem}
+.top .dot{width:9px;height:9px;border-radius:50%;background:var(--c);flex:0 0 auto}
+.top .rail{flex:1;height:4px;border-radius:999px;background:var(--line);overflow:hidden;min-width:20px}
+.top .rail span{display:block;height:100%;background:var(--c)}
+.top b{font-weight:800;font-variant-numeric:tabular-nums;min-width:62px;text-align:right}
+
+.quip{display:flex;align-items:center;gap:12px}
 .quip svg{flex:0 0 auto;width:46px;height:46px}
-.quip p{margin:0;font-size:.88rem;color:var(--text)}
+.quip p{margin:0;font-size:.88rem}
 .quip .blob{fill:var(--state);transition:fill .5s ease}
-.quip .ln{stroke:var(--page);stroke-width:2.4;fill:none;stroke-linecap:round;transition:d .35s ease}
+.quip .ln{stroke:var(--page);stroke-width:2.4;fill:none;stroke-linecap:round}
 .quip .eye{fill:var(--page)}
 
-/* ---- столбики по дням ---- */
 .bars{display:flex;align-items:flex-end;gap:2px;height:74px;margin-top:12px}
-.bars i{flex:1;min-width:2px;background:var(--line);border-radius:2px 2px 0 0;transition:background .3s,height .3s}
-.bars i.has{background:var(--state)}
-.bars i.today{outline:1px solid var(--muted);outline-offset:1px}
-
-.ringwrap{display:flex;align-items:center;gap:12px;min-width:0}
-.ringwrap>div{min-width:0}
-.ring{width:56px;height:56px;flex:0 0 auto}
-.ring .track{fill:none;stroke:var(--line);stroke-width:5}
-.ring .val{fill:none;stroke:var(--state);stroke-width:5;stroke-linecap:round;transition:stroke .5s ease,stroke-dasharray .5s ease}
-.pct{font:800 1.25rem/1 var(--font);font-variant-numeric:tabular-nums}
+.bars i{flex:1;min-width:2px;background:var(--bar);border-radius:2px 2px 0 0}
+.bars i.zero{background:var(--line);border-radius:2px}
+.bars i.future{background:var(--dim);border-radius:2px}
+.bars i.today{background:var(--state)}
+.bars-cap{display:flex;font-size:.72rem;color:var(--muted);margin-top:8px;gap:8px}
+.bars-cap .mid{margin-left:auto;color:var(--state)}
+.bars-cap .end{margin-left:auto}
 
 input,button{font:inherit;color:inherit}
 button{cursor:pointer}
 :focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 
-/* ---- иконки категорий ---- */
 .cats{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
 .cats button{
   aspect-ratio:1;border-radius:50%;border:2px solid transparent;background:var(--c);
-  display:grid;place-items:center;font-size:1.25rem;line-height:1;
-  box-shadow:inset 0 -2px 0 rgba(0,0,0,.18);opacity:.55;
+  display:grid;place-items:center;opacity:.55;
   transition:opacity .18s,transform .18s,border-color .18s;
 }
+.cats button svg{width:20px;height:20px;stroke:var(--page);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .cats button:hover{transform:translateY(-3px);opacity:.85}
 .cats button[aria-pressed="true"]{opacity:1;border-color:var(--text);transform:translateY(-3px)}
 .cat-name{text-align:center;color:var(--muted);font-size:.8rem;margin-top:8px;min-height:1.2em}
 
-/* ---- барабан суммы ---- */
 .amount{
   display:block;width:100%;background:none;border:none;text-align:center;
   font:800 2.6rem/1 var(--font);font-variant-numeric:tabular-nums;
@@ -103,58 +100,68 @@ button{cursor:pointer}
   position:relative;height:46px;border-radius:999px;background:var(--page);
   border:1px solid var(--line);overflow:hidden;cursor:ew-resize;touch-action:none;
 }
-.dial .ticks{
-  position:absolute;inset:0;
-  background:repeating-linear-gradient(90deg,var(--muted) 0 1px,transparent 1px 14px);
-  opacity:.5;
-}
+.dial .ticks{position:absolute;inset:0;background:repeating-linear-gradient(90deg,var(--muted) 0 1px,transparent 1px 14px);opacity:.5}
 .dial .needle{position:absolute;left:50%;top:6px;bottom:6px;width:3px;border-radius:2px;background:var(--state);transition:background .5s ease}
-.dial-cap{display:flex;justify-content:space-between;color:var(--muted);font-size:.72rem;margin-top:6px}
-.note-in,.budget-in{
-  width:100%;background:var(--page);border:1px solid var(--line);border-radius:12px;padding:11px 13px;
+.dial .arr{position:absolute;top:50%;transform:translateY(-50%);stroke:var(--muted);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.dial .arr.l{left:12px}
+.dial .arr.r{right:12px}
+.presets{display:flex;gap:8px;margin-top:10px}
+.presets button{
+  flex:1;border:1px solid var(--line);border-radius:999px;padding:10px 0;background:none;
+  color:var(--muted);font-size:.85rem;font-variant-numeric:tabular-nums;transition:border-color .2s,color .2s;
 }
+.presets button:hover{border-color:var(--gold);color:var(--gold)}
+
+.note-in{width:100%;background:var(--page);border:1px solid var(--line);border-radius:12px;padding:11px 13px;margin-top:12px}
 .note-in::placeholder{color:var(--muted)}
 .submit{
   width:100%;background:var(--page);color:var(--gold);border:1px solid var(--gold);border-radius:999px;
-  padding:14px;font:800 1rem/1 var(--font);letter-spacing:.01em;
-  transition:background .2s,color .2s;
+  padding:14px;font:800 1rem/1 var(--font);margin-top:12px;transition:background .2s,color .2s;
 }
 .submit:hover{background:var(--gold);color:var(--page)}
+
 .budget-in{
-  border:none;border-bottom:1px dashed var(--line);border-radius:0;padding:0 0 2px;
-  width:6ch;max-width:100%;flex:0 1 auto;
-  font:800 .9rem/1 var(--font);font-variant-numeric:tabular-nums;text-align:right;background:none;
+  border:none;border-bottom:1px dashed var(--line);border-radius:0;padding:0 0 1px;
+  width:6.5ch;background:none;color:var(--text);
+  font:800 .88rem/1 var(--font);font-variant-numeric:tabular-nums;text-align:right;
 }
 .budget-in::-webkit-outer-spin-button,.budget-in::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .budget-in{-moz-appearance:textfield}
+
+.ops-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ghost{
+  background:none;border:1px solid var(--line);border-radius:999px;color:var(--muted);
+  padding:6px 12px;font:500 .78rem/1 var(--font);display:flex;align-items:center;gap:6px;
+  transition:border-color .2s,color .2s;
+}
+.ghost svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ghost:hover{border-color:var(--gold);color:var(--gold)}
+.ops-head .ghost:first-of-type{margin-left:auto}
 
 .list{display:flex;flex-direction:column;margin-top:10px}
 .day{display:flex;align-items:baseline;gap:10px;padding:14px 0 6px;border-bottom:1px solid var(--line)}
 .day span{font:500 10px/1 var(--font);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
 .day b{margin-left:auto;font:800 .9rem/1 var(--font);font-variant-numeric:tabular-nums}
 .tx{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:.9rem}
-.tx .ic{width:28px;height:28px;border-radius:50%;background:var(--c);display:grid;place-items:center;font-size:.9rem;flex:0 0 auto}
+.tx .ic{width:28px;height:28px;border-radius:50%;background:var(--c);display:grid;place-items:center;flex:0 0 auto}
+.tx .ic svg{width:15px;height:15px;stroke:var(--page);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .tx .note{color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tx em{margin-left:auto;font:800 .92rem/1 var(--font);font-style:normal;font-variant-numeric:tabular-nums}
 .del{background:none;border:none;color:var(--muted);padding:2px 6px;border-radius:6px;opacity:0;transition:opacity .15s,color .15s}
 .tx:hover .del,.del:focus-visible{opacity:1}
 .del:hover{color:var(--bad)}
-.empty{color:var(--muted);font-size:.9rem;padding:14px 0}
 
-.ops-head{display:flex;align-items:center;gap:8px}
-.ghost{
-  background:none;border:1px solid var(--line);border-radius:999px;color:var(--muted);
-  padding:6px 12px;font:500 .78rem/1 var(--font);transition:border-color .2s,color .2s;
-}
-.ghost:hover{border-color:var(--gold);color:var(--gold)}
-.ops-head .ghost:first-of-type{margin-left:auto}
+.blank{display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;padding:22px 16px}
+.blank svg{width:64px;height:64px}
+.blank h2{margin:0;font:800 1.25rem/1.2 var(--font);letter-spacing:-.02em}
+.blank p{margin:0;color:var(--muted);font-size:.88rem;max-width:32ch}
+
 .toast{
   position:fixed;left:50%;bottom:24px;transform:translateX(-50%);
   background:var(--card-hi);border:1px solid var(--gold);color:var(--text);
   padding:11px 18px;border-radius:999px;font-size:.86rem;z-index:9;
   box-shadow:0 10px 30px rgba(0,0,0,.5);
 }
-
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -166,101 +173,129 @@ button{cursor:pointer}
     <span class="m" id="month-name"></span>
   </header>
 
-  <div class="bento">
+  <section class="cell blank" id="blank" hidden>
+    <svg viewBox="0 0 46 46" role="img" aria-label="Маскот">
+      <path class="blob" d="M7 28C7 16 14 8 23 8s16 8 16 20c0 6-7 10-16 10S7 34 7 28z" fill="#D9B45B"></path>
+      <circle cx="17.5" cy="25" r="3" fill="#0E0E10"></circle>
+      <circle cx="28.5" cy="25" r="3" fill="#0E0E10"></circle>
+      <path d="M17 32c3 2.6 9 2.6 12 0" stroke="#0E0E10" stroke-width="2.4" fill="none" stroke-linecap="round"></path>
+    </svg>
+    <h2>Месяц чистый</h2>
+    <p id="blank-text"></p>
+  </section>
 
-    <!-- герой: сумма + маскот -->
-    <section class="cell span2">
-      <div class="lbl">Потрачено за месяц</div>
-      <div class="num" id="total" aria-live="polite">0 ₽</div>
-      <div class="quip">
-        <svg viewBox="0 0 46 46" role="img" aria-labelledby="mascot-alt">
-          <title id="mascot-alt">Настроение бюджета</title>
-          <path class="blob" d="M7 28C7 16 14 8 23 8s16 8 16 20c0 6-7 10-16 10S7 34 7 28z"/>
-          <circle class="eye" id="eye-l" cx="17.5" cy="25" r="3"/>
-          <circle class="eye" id="eye-r" cx="28.5" cy="25" r="3"/>
-          <path class="ln" id="mouth" d="M17 32c3 2.6 9 2.6 12 0"/>
-        </svg>
-        <p id="quip">Пока пусто — добавьте первую трату.</p>
+  <section class="cell hero" id="hero">
+    <div>
+      <div class="lbl" id="left-label">Осталось</div>
+      <div class="num" id="left" aria-live="polite">0 ₽</div>
+      <div class="sub">
+        Потрачено <span id="spent">0</span> из
+        <label><input class="budget-in" id="budget" type="number" min="0" step="500" aria-label="Бюджет на месяц, ₽"></label> ₽
       </div>
-    </section>
+    </div>
 
-    <!-- бюджет -->
-    <section class="cell">
-      <div class="ringwrap">
-        <svg class="ring" viewBox="0 0 40 40" role="img" aria-labelledby="ring-alt">
-          <title id="ring-alt">Доля израсходованного бюджета</title>
-          <circle class="track" cx="20" cy="20" r="16"></circle>
-          <circle class="val" id="ring" cx="20" cy="20" r="16" pathLength="100" stroke-dasharray="0 100" transform="rotate(-90 20 20)"></circle>
-        </svg>
-        <div>
-          <div class="lbl">Бюджет</div>
-          <div class="pct" id="pct">0 %</div>
-          <label style="color:var(--muted);font-size:.78rem;display:flex;gap:4px;align-items:baseline;margin-top:4px">
-            из <input class="budget-in" id="budget" type="number" min="0" step="500" aria-label="Бюджет на месяц, ₽"> ₽
-          </label>
-        </div>
+    <div>
+      <div class="track">
+        <div class="fill" id="fill" style="width:0%"></div>
+        <div class="plan" id="plan" style="left:0%"></div>
       </div>
-    </section>
-
-    <!-- крупнейшая категория -->
-    <section class="cell">
-      <div class="lbl">Крупнейшая</div>
-      <div id="top-cat" style="font:800 1.05rem/1.2 'Manrope',sans-serif;margin-top:8px">—</div>
-      <div id="top-sum" style="color:var(--muted);font-size:.82rem;margin-top:4px">нет трат</div>
-    </section>
-
-    <!-- дни месяца -->
-    <section class="cell span2">
-      <div class="lbl">По дням</div>
-      <div class="bars" id="bars" role="img" aria-labelledby="bars-alt"></div>
-      <span id="bars-alt" class="lbl" style="letter-spacing:.04em;text-transform:none;display:block;margin-top:8px">Высота столбика — сумма за день</span>
-    </section>
-
-    <!-- добавление -->
-    <section class="cell span2">
-      <form id="add" autocomplete="off">
-        <div class="lbl">Новая трата</div>
-        <div class="cats" id="cats" style="margin-top:10px"></div>
-        <div class="cat-name" id="cat-name"></div>
-        <input class="amount" id="amount" type="number" min="0" step="10" inputmode="decimal"
-               value="0" aria-label="Сумма, ₽">
-        <div class="dial" id="dial" role="slider" tabindex="0"
-             aria-label="Сумма перетаскиванием" aria-valuemin="0" aria-valuenow="0" aria-valuetext="0 ₽">
-          <div class="ticks" id="ticks"></div><div class="needle"></div>
-        </div>
-        <div class="dial-cap"><span>0</span><span>тяните или коснитесь суммы</span><span id="dial-max">2 000</span></div>
-        <input class="note-in" id="note" type="text" maxlength="80" placeholder="Заметка — необязательно" style="margin-top:12px">
-        <button class="submit" type="submit" style="margin-top:12px">Записать</button>
-      </form>
-    </section>
-
-    <!-- лента -->
-    <section class="cell span4">
-      <div class="ops-head">
-        <span class="lbl">Операции</span>
-        <button class="ghost" type="button" id="export">Скачать копию</button>
-        <button class="ghost" type="button" id="import-btn">Восстановить</button>
-        <input type="file" id="import" accept="application/json,.json" hidden>
+      <div class="track-cap">
+        <span id="pct">0 % бюджета</span>
+        <span class="right" id="plan-cap"></span>
       </div>
-      <div class="list" id="list"></div>
-    </section>
+    </div>
 
-  </div>
+    <div class="tops sep" id="tops"></div>
+
+    <div class="quip sep">
+      <svg viewBox="0 0 46 46" role="img" aria-labelledby="mascot-alt">
+        <title id="mascot-alt">Настроение бюджета</title>
+        <path class="blob" d="M7 28C7 16 14 8 23 8s16 8 16 20c0 6-7 10-16 10S7 34 7 28z"></path>
+        <circle class="eye" cx="17.5" cy="25" r="3"></circle>
+        <circle class="eye" cx="28.5" cy="25" r="3"></circle>
+        <path class="ln" id="mouth" d="M17 32c3 2.6 9 2.6 12 0"></path>
+      </svg>
+      <p id="quip"></p>
+    </div>
+  </section>
+
+  <section class="cell" id="days-card">
+    <div style="display:flex;align-items:baseline;gap:8px">
+      <span class="lbl">По дням</span>
+      <span style="margin-left:auto;color:var(--muted);font-size:.75rem" id="avg"></span>
+    </div>
+    <div class="bars" id="bars" role="img" aria-label="Траты по дням месяца"></div>
+    <div class="bars-cap">
+      <span id="first-day"></span>
+      <span class="mid" id="today-cap"></span>
+      <span class="end" id="last-day"></span>
+    </div>
+  </section>
+
+  <section class="cell">
+    <form id="add" autocomplete="off">
+      <div class="lbl" id="form-label">Новая трата</div>
+      <div class="cats" id="cats" style="margin-top:10px"></div>
+      <div class="cat-name" id="cat-name"></div>
+      <input class="amount" id="amount" type="number" min="0" step="10" inputmode="decimal" value="0" aria-label="Сумма, ₽">
+      <div class="dial" id="dial" role="slider" tabindex="0" aria-label="Сумма перетаскиванием"
+           aria-valuemin="0" aria-valuemax="200000" aria-valuenow="0" aria-valuetext="0 ₽">
+        <div class="ticks" id="ticks"></div>
+        <div class="needle"></div>
+        <svg class="arr l" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>
+        <svg class="arr r" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg>
+      </div>
+      <div class="presets" id="presets">
+        <button type="button" data-add="100">100</button>
+        <button type="button" data-add="500">500</button>
+        <button type="button" data-add="1000">1 000</button>
+        <button type="button" data-add="5000">5 000</button>
+      </div>
+      <input class="note-in" id="note" type="text" maxlength="80" placeholder="Заметка — необязательно">
+      <button class="submit" type="submit">Записать</button>
+    </form>
+  </section>
+
+  <section class="cell" id="ops">
+    <div class="ops-head">
+      <span class="lbl">Операции</span>
+      <button class="ghost" type="button" id="export">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v12"></path><path d="M7 12l5 5 5-5"></path><path d="M4 20h16"></path></svg>
+        Копия
+      </button>
+      <button class="ghost" type="button" id="import-btn">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20V8"></path><path d="M7 13l5-5 5 5"></path><path d="M4 4h16"></path></svg>
+        Восстановить
+      </button>
+      <input type="file" id="import" accept="application/json,.json" hidden>
+    </div>
+    <div class="list" id="list"></div>
+  </section>
+
 </div>
 
 <script>
+const ICONS = {
+  food:  '<path d="M3 11h18"></path><path d="M4 11a8 8 0 0 0 16 0"></path><path d="M2 19h20"></path>',
+  metro: '<rect x="6" y="3" width="12" height="14" rx="3"></rect><path d="M6 10h12"></path><path d="M8 21l2-3M16 21l-2-3"></path>',
+  home:  '<path d="M4 11l8-6 8 6"></path><path d="M6 10v9h12v-9"></path>',
+  pill:  '<rect x="3" y="8" width="18" height="8" rx="4" transform="rotate(-45 12 12)"></rect><path d="M9 9l6 6"></path>',
+  film:  '<rect x="3" y="6" width="18" height="12" rx="2"></rect><path d="M3 10h18M8 6v4M16 6v4"></path>',
+  bill:  '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"></path><path d="M9 8h6M9 12h6"></path>',
+};
 const CATS = [
-  { name: 'Еда',         icon: '🍜', color: '#F4A340' },
-  { name: 'Транспорт',   icon: '🚇', color: '#4A90D9' },
-  { name: 'Дом',         icon: '🏠', color: '#9B6BD6' },
-  { name: 'Здоровье',    icon: '💊', color: '#57C2C2' },
-  { name: 'Развлечения', icon: '🎬', color: '#E4577E' },
-  { name: 'Прочее',      icon: '🧾', color: '#8BC34A' },
+  { name: 'Еда',         icon: ICONS.food,  color: '#F4A340' },
+  { name: 'Транспорт',   icon: ICONS.metro, color: '#4A90D9' },
+  { name: 'Дом',         icon: ICONS.home,  color: '#9B6BD6' },
+  { name: 'Здоровье',    icon: ICONS.pill,  color: '#57C2C2' },
+  { name: 'Развлечения', icon: ICONS.film,  color: '#E4577E' },
+  { name: 'Прочее',      icon: ICONS.bill,  color: '#8BC34A' },
 ];
 const KEY = 'traty', BKEY = 'traty-budget';
 const $ = s => document.querySelector(s);
 const cat = n => CATS.find(c => c.name === n) || CATS[5];
 const money = n => Math.round(n).toLocaleString('ru-RU') + ' ₽';
+const plain = n => Math.round(n).toLocaleString('ru-RU');
 const localDay = d => d.toLocaleDateString('sv');           // sv → YYYY-MM-DD в местном времени
 
 let items = JSON.parse(localStorage.getItem(KEY) || '[]');
@@ -274,8 +309,8 @@ const save = () => {
 };
 
 /* ---------- барабан ---------- */
-// ponytail: линейная шкала 0…2000 с шагом 10; для сумм крупнее — ввод цифрами в поле.
-const DIAL_MAX = 2000, STEP = 10, PX_PER_STEP = 4;
+// ponytail: шаг 10 ₽ на 4 px; крупные суммы — пресетами или цифрами в поле.
+const STEP = 10, PX_PER_STEP = 4;
 
 function setAmount(v) {
   amount = Math.max(0, Math.round(v / STEP) * STEP);
@@ -302,12 +337,18 @@ dial.addEventListener('keydown', e => {
   setAmount(amount + k);
 });
 $('#amount').oninput = e => { amount = Math.max(0, Number(e.target.value) || 0); };
+$('#presets').onclick = e => {
+  const b = e.target.closest('button');
+  if (b) setAmount(amount + Number(b.dataset.add));
+};
 
 /* ---------- категории ---------- */
 function renderCats() {
   $('#cats').innerHTML = CATS.map(c => `
     <button type="button" data-cat="${c.name}" style="--c:${c.color}"
-            aria-pressed="${c.name === picked}" aria-label="${c.name}">${c.icon}</button>`).join('');
+            aria-pressed="${c.name === picked}" aria-label="${c.name}">
+      <svg viewBox="0 0 24 24" aria-hidden="true">${c.icon}</svg>
+    </button>`).join('');
   $('#cat-name').textContent = picked;
 }
 $('#cats').onclick = e => {
@@ -336,22 +377,21 @@ $('#list').onclick = e => {
   render();
 };
 
-/* ---------- состояние месяца: цвет + реплика маскота ---------- */
+/* ---------- состояние месяца ---------- */
 const MOUTH = {
-  good: 'M17 32c3 2.6 9 2.6 12 0',   // улыбка
-  warn: 'M17 33h12',                  // ровная линия
-  bad:  'M17 35c3-3.4 9-3.4 12 0',    // гримаса
+  good: 'M17 32c3 2.6 9 2.6 12 0',
+  warn: 'M17 33h12',
+  bad:  'M17 35c3-3.4 9-3.4 12 0',
 };
 
-function mood(spent, expected, top, topShare) {
-  if (!items.length) return ['good', 'Пока пусто — добавьте первую трату.'];
-  if (budget && spent > budget)
-    return ['bad', `Бюджет кончился, а месяц нет. Больше всех съела «${top}» — ${topShare} %.`];
+function mood(spent, expected, perDayLeft, left) {
+  if (budget && left <= 0) return ['bad', 'Бюджет кончился, а месяц нет. Дальше — из запаса.'];
+  const perDay = `<strong style="font-weight:800">${money(perDayLeft)} в день</strong> до конца месяца`;
   const r = expected ? spent / expected : 0;
-  if (r > 1.4) return ['bad', `Летим намного быстрее плана. «${top}» тянет ${topShare} % расходов.`];
-  if (r > 1.2) return ['warn', `Опережаем план. Главный аппетит у «${top}» — ${topShare} %.`];
-  if (r > 0.85) return ['good', `Идём ровно по плану. «${top}» — ${topShare} % расходов.`];
-  return ['good', `Тратим экономнее плана. «${top}» — ${topShare} %, остальное скромно.`];
+  if (r > 1.4) return ['bad', `Летим быстрее плана. Осталось ${perDay}.`];
+  if (r > 1.2) return ['warn', `Опережаем план. Осталось ${perDay}.`];
+  if (r > 0.85) return ['good', `Идём ровно по плану — ${perDay}.`];
+  return ['good', `Идёте с запасом — ${perDay}.`];
 }
 
 function render() {
@@ -359,58 +399,87 @@ function render() {
   const month = localDay(now).slice(0, 7);
   const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
   const today = now.getDate();
+  const daysLeft = daysInMonth - today + 1;
+  const monthShort = now.toLocaleDateString('ru-RU', { month: 'short' });
 
   const mine = items.filter(i => i.date.startsWith(month));
   const spent = mine.reduce((s, i) => s + i.amount, 0);
+  const left = budget - spent;
   const expected = budget * today / daysInMonth;
-
-  const byCat = {};
-  for (const i of mine) byCat[i.cat] = (byCat[i.cat] || 0) + i.amount;
-  const [tc, ts] = Object.entries(byCat).sort((a, b) => b[1] - a[1])[0] || [];
-  const topShare = ts ? Math.round(ts / spent * 100) : 0;
-
-  const [state, text] = mood(spent, expected, tc, topShare);
-  document.documentElement.style.setProperty('--state', `var(--${state})`);
-  $('#quip').textContent = text;
-  $('#mouth').setAttribute('d', MOUTH[state]);
+  const perDayLeft = Math.max(left, 0) / daysLeft;
 
   $('#month-name').textContent = now.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' }).replace(' г.', '');
-  $('#total').textContent = money(spent);
-
-  const pct = budget ? Math.round(spent / budget * 100) : 0;
-  $('#pct').textContent = pct + ' %';
-  $('#ring').setAttribute('stroke-dasharray', `${Math.min(pct, 100)} 100`);
   $('#budget').value = budget;
+  $('#spent').textContent = plain(spent);
 
-  $('#top-cat').textContent = tc || '—';
-  $('#top-cat').style.color = tc ? cat(tc).color : 'var(--text)';
-  $('#top-sum').textContent = tc ? `${money(ts)} · ${topShare} %` : 'нет трат';
+  /* пустой месяц: одна карточка вместо трёх пустышек */
+  const blank = mine.length === 0;
+  $('#blank').hidden = !blank;
+  $('#hero').hidden = blank;
+  $('#days-card').hidden = blank;
+  $('#ops').hidden = items.length === 0;
+  $('#form-label').textContent = blank ? 'Первая трата' : 'Новая трата';
+  $('#blank-text').textContent = budget
+    ? `Запишите первую трату — и я посчитаю, сколько можно тратить в день, чтобы уложиться в ${money(budget)}.`
+    : 'Запишите первую трату — и появится разбор месяца.';
 
+  const [state, text] = mood(spent, expected, perDayLeft, left);
+  document.documentElement.style.setProperty('--state', `var(--${state})`);
+  $('#quip').innerHTML = text;
+  $('#mouth').setAttribute('d', MOUTH[state]);
+
+  /* остаток и полоса плана */
+  $('#left-label').textContent = left < 0 ? 'Перерасход за месяц' : 'Осталось до конца месяца';
+  $('#left').textContent = money(Math.abs(left));
+  const pct = budget ? spent / budget * 100 : 0;
+  $('#fill').style.width = Math.min(pct, 100) + '%';
+  $('#plan').style.left = (today / daysInMonth * 100) + '%';
+  $('#pct').textContent = Math.round(pct) + ' % бюджета';
+  $('#plan-cap').textContent = `план на сегодня — ${Math.round(today / daysInMonth * 100)} %`;
+
+  /* топ-3 категории */
+  const byCat = {};
+  for (const i of mine) byCat[i.cat] = (byCat[i.cat] || 0) + i.amount;
+  const top = Object.entries(byCat).sort((a, b) => b[1] - a[1]).slice(0, 3);
+  const peakCat = top.length ? top[0][1] : 1;
+  $('#tops').innerHTML = top.map(([n, s]) => `
+    <div class="top" style="--c:${cat(n).color}">
+      <span class="dot"></span><span>${esc(n)}</span>
+      <span class="rail"><span style="width:${s / peakCat * 100}%"></span></span>
+      <b>${money(s)}</b>
+    </div>`).join('');
+
+  /* столбики по дням */
   const perDay = new Array(daysInMonth + 1).fill(0);
   for (const i of mine) perDay[Number(i.date.slice(8, 10))] += i.amount;
   const peak = Math.max(...perDay, 1);
   $('#bars').innerHTML = perDay.slice(1).map((v, k) => {
     const d = k + 1;
-    return `<i class="${v ? 'has' : ''} ${d === today ? 'today' : ''}" style="height:${Math.max(v / peak * 100, 3)}%"
-              title="${d} — ${money(v)}"></i>`;
+    const cls = d === today ? 'today' : d > today ? 'future' : v ? '' : 'zero';
+    const h = (cls === 'zero' || cls === 'future') ? '2px' : Math.max(v / peak * 100, 6) + '%';
+    return `<i class="${cls}" style="height:${h}" title="${d} — ${money(v)}"></i>`;
   }).join('');
+  $('#avg').textContent = spent ? `в среднем ${money(spent / today)}` : '';
+  $('#today-cap').textContent = perDay[today] ? `сегодня — ${money(perDay[today])}` : '';
+  $('#first-day').textContent = `1 ${monthShort}`;
+  $('#last-day').textContent = `${daysInMonth} ${monthShort}`;
 
+  /* лента операций */
   const byDay = {};
   for (const i of [...items].sort((a, b) => b.date.localeCompare(a.date))) (byDay[i.date] ||= []).push(i);
-  const days = Object.entries(byDay);
-  $('#list').innerHTML = days.length ? days.map(([d, list]) => `
+  const todayKey = localDay(now);
+  $('#list').innerHTML = Object.entries(byDay).map(([d, list]) => `
     <div class="day">
-      <span>${new Date(d + 'T00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}</span>
+      <span>${d === todayKey ? 'Сегодня' : new Date(d + 'T00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}</span>
       <b>${money(list.reduce((s, i) => s + i.amount, 0))}</b>
     </div>
     ${list.map(i => `<div class="tx">
-        <span class="ic" style="--c:${cat(i.cat).color}">${cat(i.cat).icon}</span>
+        <span class="ic" style="--c:${cat(i.cat).color}"><svg viewBox="0 0 24 24" aria-hidden="true">${cat(i.cat).icon}</svg></span>
         <span>${esc(i.cat)}</span>
         ${i.note ? `<span class="note">${esc(i.note)}</span>` : ''}
         <em>${money(i.amount)}</em>
         <button class="del" type="button" data-id="${i.id}" aria-label="Удалить: ${esc(i.cat)}, ${money(i.amount)}">✕</button>
-      </div>`).join('')}`).join('')
-    : '<div class="empty">Операций пока нет.</div>';
+      </div>`).join('')}`).join('');
 }
 
 function esc(s) { return s.replace(/[<>&"]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' })[c]); }
@@ -427,7 +496,7 @@ $('#export').onclick = () => {
   const blob = new Blob([JSON.stringify({ budget, items }, null, 1)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `traty-${localDay(new Date())}.json`;
+  a.download = `tratomer-${localDay(new Date())}.json`;
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   toast(`Сохранено ${items.length} записей`);
@@ -475,7 +544,6 @@ if ('serviceWorker' in navigator) {
   addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
 }
 
-$('#dial-max').textContent = DIAL_MAX.toLocaleString('ru-RU');
 renderCats();
 setAmount(0);
 render();

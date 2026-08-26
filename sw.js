@@ -1,6 +1,6 @@
 // Сеть в приоритете: онлайн — всегда свежая версия, офлайн — из кэша.
 // ponytail: меняйте VERSION при выкладке, чтобы старый кэш подчистился.
-const VERSION = 'traty-v4';
+const VERSION = 'traty-v5';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {

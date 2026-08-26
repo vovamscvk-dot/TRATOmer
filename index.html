@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Траты</title>
+<meta name="theme-color" content="#0E0E10">
+<meta name="description" content="Учёт личных ежедневных расходов">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Траты">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap">
+<style>
+:root{
+  --page:#0E0E10; --card:#151517; --card-hi:#1C1C1F; --line:#26262A;
+  --text:#F2F2F3; --muted:#8A8A90;
+  --gold:#D9B45B; --good:#D9B45B; --warn:#FF8A3D; --bad:#FF4D4D;
+  --state:var(--gold);
+  --font:-apple-system,"SF Pro Display","SF Pro Text",BlinkMacSystemFont,"Manrope",system-ui,sans-serif;
+  --r:20px;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;padding:clamp(14px,3vw,32px);
+  background:var(--page);color:var(--text);
+  font:400 16px/1.5 var(--font);-webkit-font-smoothing:antialiased;
+}
+.app{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+header{display:flex;align-items:baseline;gap:10px;padding:2px 4px 0}
+header h1{font:800 1.15rem/1 var(--font);letter-spacing:-.02em;margin:0}
+header .m{margin-left:auto;color:var(--muted);font-size:.82rem}
+header .m::first-letter{text-transform:uppercase}
+
+.bento{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.cell{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;min-width:0;
+  transition:transform .2s cubic-bezier(.2,.8,.2,1),background .2s;
+}
+.cell:hover{transform:translateY(-4px);background:var(--card-hi)}
+.span2{grid-column:span 2}.span4{grid-column:span 4}
+@media (max-width:760px){.bento{grid-template-columns:repeat(2,1fr)}.span4,.span2{grid-column:span 2}}
+
+.lbl{font:500 10px/1 var(--font);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.num{font:800 clamp(2.1rem,7vw,3.4rem)/1 var(--font);letter-spacing:-.03em;font-variant-numeric:tabular-nums;margin:10px 0 2px}
+
+/* ---- строка-комментатор (маскот) ---- */
+.quip{display:flex;align-items:center;gap:12px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.quip svg{flex:0 0 auto;width:46px;height:46px}
+.quip p{margin:0;font-size:.88rem;color:var(--text)}
+.quip .blob{fill:var(--state);transition:fill .5s ease}
+.quip .ln{stroke:var(--page);stroke-width:2.4;fill:none;stroke-linecap:round;transition:d .35s ease}
+.quip .eye{fill:var(--page)}
+
+/* ---- столбики по дням ---- */
+.bars{display:flex;align-items:flex-end;gap:2px;height:74px;margin-top:12px}
+.bars i{flex:1;min-width:2px;background:var(--line);border-radius:2px 2px 0 0;transition:background .3s,height .3s}
+.bars i.has{background:var(--state)}
+.bars i.today{outline:1px solid var(--muted);outline-offset:1px}
+
+.ringwrap{display:flex;align-items:center;gap:12px}
+.ring{width:56px;height:56px;flex:0 0 auto}
+.ring .track{fill:none;stroke:var(--line);stroke-width:5}
+.ring .val{fill:none;stroke:var(--state);stroke-width:5;stroke-linecap:round;transition:stroke .5s ease,stroke-dasharray .5s ease}
+.pct{font:800 1.25rem/1 var(--font);font-variant-numeric:tabular-nums}
+
+input,button{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+/* ---- иконки категорий ---- */
+.cats{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+.cats button{
+  aspect-ratio:1;border-radius:50%;border:2px solid transparent;background:var(--c);
+  display:grid;place-items:center;font-size:1.25rem;line-height:1;
+  box-shadow:inset 0 -2px 0 rgba(0,0,0,.18);opacity:.55;
+  transition:opacity .18s,transform .18s,border-color .18s;
+}
+.cats button:hover{transform:translateY(-3px);opacity:.85}
+.cats button[aria-pressed="true"]{opacity:1;border-color:var(--text);transform:translateY(-3px)}
+.cat-name{text-align:center;color:var(--muted);font-size:.8rem;margin-top:8px;min-height:1.2em}
+
+/* ---- барабан суммы ---- */
+.amount{
+  display:block;width:100%;background:none;border:none;text-align:center;
+  font:800 2.6rem/1 var(--font);font-variant-numeric:tabular-nums;
+  letter-spacing:-.02em;color:var(--text);padding:6px 0;
+}
+.amount::-webkit-outer-spin-button,.amount::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.amount{-moz-appearance:textfield}
+.dial{
+  position:relative;height:46px;border-radius:999px;background:var(--page);
+  border:1px solid var(--line);overflow:hidden;cursor:ew-resize;touch-action:none;
+}
+.dial .ticks{
+  position:absolute;inset:0;
+  background:repeating-linear-gradient(90deg,var(--muted) 0 1px,transparent 1px 14px);
+  opacity:.5;
+}
+.dial .needle{position:absolute;left:50%;top:6px;bottom:6px;width:3px;border-radius:2px;background:var(--state);transition:background .5s ease}
+.dial-cap{display:flex;justify-content:space-between;color:var(--muted);font-size:.72rem;margin-top:6px}
+.note-in,.budget-in{
+  width:100%;background:var(--page);border:1px solid var(--line);border-radius:12px;padding:11px 13px;
+}
+.note-in::placeholder{color:var(--muted)}
+.submit{
+  width:100%;background:var(--page);color:var(--gold);border:1px solid var(--gold);border-radius:999px;
+  padding:14px;font:800 1rem/1 var(--font);letter-spacing:.01em;
+  transition:background .2s,color .2s;
+}
+.submit:hover{background:var(--gold);color:var(--page)}
+.budget-in{
+  border:none;border-bottom:1px dashed var(--line);border-radius:0;padding:0 0 2px;width:7ch;
+  font:800 1.05rem/1 var(--font);font-variant-numeric:tabular-nums;text-align:right;background:none;
+}
+.budget-in::-webkit-outer-spin-button,.budget-in::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.budget-in{-moz-appearance:textfield}
+
+.list{display:flex;flex-direction:column;margin-top:10px}
+.day{display:flex;align-items:baseline;gap:10px;padding:14px 0 6px;border-bottom:1px solid var(--line)}
+.day span{font:500 10px/1 var(--font);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.day b{margin-left:auto;font:800 .9rem/1 var(--font);font-variant-numeric:tabular-nums}
+.tx{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:.9rem}
+.tx .ic{width:28px;height:28px;border-radius:50%;background:var(--c);display:grid;place-items:center;font-size:.9rem;flex:0 0 auto}
+.tx .note{color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tx em{margin-left:auto;font:800 .92rem/1 var(--font);font-style:normal;font-variant-numeric:tabular-nums}
+.del{background:none;border:none;color:var(--muted);padding:2px 6px;border-radius:6px;opacity:0;transition:opacity .15s,color .15s}
+.tx:hover .del,.del:focus-visible{opacity:1}
+.del:hover{color:var(--bad)}
+.empty{color:var(--muted);font-size:.9rem;padding:14px 0}
+
+.ops-head{display:flex;align-items:center;gap:8px}
+.ghost{
+  background:none;border:1px solid var(--line);border-radius:999px;color:var(--muted);
+  padding:6px 12px;font:500 .78rem/1 var(--font);transition:border-color .2s,color .2s;
+}
+.ghost:hover{border-color:var(--gold);color:var(--gold)}
+.ops-head .ghost:first-of-type{margin-left:auto}
+.toast{
+  position:fixed;left:50%;bottom:24px;transform:translateX(-50%);
+  background:var(--card-hi);border:1px solid var(--gold);color:var(--text);
+  padding:11px 18px;border-radius:999px;font-size:.86rem;z-index:9;
+  box-shadow:0 10px 30px rgba(0,0,0,.5);
+}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <h1>Траты</h1>
+    <span class="m" id="month-name"></span>
+  </header>
+
+  <div class="bento">
+
+    <!-- герой: сумма + маскот -->
+    <section class="cell span2">
+      <div class="lbl">Потрачено за месяц</div>
+      <div class="num" id="total" aria-live="polite">0 ₽</div>
+      <div class="quip">
+        <svg viewBox="0 0 46 46" role="img" aria-labelledby="mascot-alt">
+          <title id="mascot-alt">Настроение бюджета</title>
+          <path class="blob" d="M7 28C7 16 14 8 23 8s16 8 16 20c0 6-7 10-16 10S7 34 7 28z"/>
+          <circle class="eye" id="eye-l" cx="17.5" cy="25" r="3"/>
+          <circle class="eye" id="eye-r" cx="28.5" cy="25" r="3"/>
+          <path class="ln" id="mouth" d="M17 32c3 2.6 9 2.6 12 0"/>
+        </svg>
+        <p id="quip">Пока пусто — добавьте первую трату.</p>
+      </div>
+    </section>
+
+    <!-- бюджет -->
+    <section class="cell">
+      <div class="ringwrap">
+        <svg class="ring" viewBox="0 0 40 40" role="img" aria-labelledby="ring-alt">
+          <title id="ring-alt">Доля израсходованного бюджета</title>
+          <circle class="track" cx="20" cy="20" r="16"></circle>
+          <circle class="val" id="ring" cx="20" cy="20" r="16" pathLength="100" stroke-dasharray="0 100" transform="rotate(-90 20 20)"></circle>
+        </svg>
+        <div>
+          <div class="lbl">Бюджет</div>
+          <div class="pct" id="pct">0 %</div>
+          <label style="color:var(--muted);font-size:.78rem;display:flex;gap:4px;align-items:baseline;margin-top:4px">
+            из <input class="budget-in" id="budget" type="number" min="0" step="500" aria-label="Бюджет на месяц, ₽"> ₽
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <!-- крупнейшая категория -->
+    <section class="cell">
+      <div class="lbl">Крупнейшая</div>
+      <div id="top-cat" style="font:800 1.05rem/1.2 'Manrope',sans-serif;margin-top:8px">—</div>
+      <div id="top-sum" style="color:var(--muted);font-size:.82rem;margin-top:4px">нет трат</div>
+    </section>
+
+    <!-- дни месяца -->
+    <section class="cell span2">
+      <div class="lbl">По дням</div>
+      <div class="bars" id="bars" role="img" aria-labelledby="bars-alt"></div>
+      <span id="bars-alt" class="lbl" style="letter-spacing:.04em;text-transform:none;display:block;margin-top:8px">Высота столбика — сумма за день</span>
+    </section>
+
+    <!-- добавление -->
+    <section class="cell span2">
+      <form id="add" autocomplete="off">
+        <div class="lbl">Новая трата</div>
+        <div class="cats" id="cats" style="margin-top:10px"></div>
+        <div class="cat-name" id="cat-name"></div>
+        <input class="amount" id="amount" type="number" min="0" step="10" inputmode="decimal"
+               value="0" aria-label="Сумма, ₽">
+        <div class="dial" id="dial" role="slider" tabindex="0"
+             aria-label="Сумма перетаскиванием" aria-valuemin="0" aria-valuenow="0" aria-valuetext="0 ₽">
+          <div class="ticks" id="ticks"></div><div class="needle"></div>
+        </div>
+        <div class="dial-cap"><span>0</span><span>тяните или коснитесь суммы</span><span id="dial-max">2 000</span></div>
+        <input class="note-in" id="note" type="text" maxlength="80" placeholder="Заметка — необязательно" style="margin-top:12px">
+        <button class="submit" type="submit" style="margin-top:12px">Записать</button>
+      </form>
+    </section>
+
+    <!-- лента -->
+    <section class="cell span4">
+      <div class="ops-head">
+        <span class="lbl">Операции</span>
+        <button class="ghost" type="button" id="export">Скачать копию</button>
+        <button class="ghost" type="button" id="import-btn">Восстановить</button>
+        <input type="file" id="import" accept="application/json,.json" hidden>
+      </div>
+      <div class="list" id="list"></div>
+    </section>
+
+  </div>
+</div>
+
+<script>
+const CATS = [
+  { name: 'Еда',         icon: '🍜', color: '#F4A340' },
+  { name: 'Транспорт',   icon: '🚇', color: '#4A90D9' },
+  { name: 'Дом',         icon: '🏠', color: '#9B6BD6' },
+  { name: 'Здоровье',    icon: '💊', color: '#57C2C2' },
+  { name: 'Развлечения', icon: '🎬', color: '#E4577E' },
+  { name: 'Прочее',      icon: '🧾', color: '#8BC34A' },
+];
+const KEY = 'traty', BKEY = 'traty-budget';
+const $ = s => document.querySelector(s);
+const cat = n => CATS.find(c => c.name === n) || CATS[5];
+const money = n => Math.round(n).toLocaleString('ru-RU') + ' ₽';
+const localDay = d => d.toLocaleDateString('sv');           // sv → YYYY-MM-DD в местном времени
+
+let items = JSON.parse(localStorage.getItem(KEY) || '[]');
+let budget = Number(localStorage.getItem(BKEY)) || 30000;
+let picked = CATS[0].name;
+let amount = 0;
+
+const save = () => {
+  localStorage.setItem(KEY, JSON.stringify(items));
+  localStorage.setItem(BKEY, String(budget));
+};
+
+/* ---------- барабан ---------- */
+// ponytail: линейная шкала 0…2000 с шагом 10; для сумм крупнее — ввод цифрами в поле.
+const DIAL_MAX = 2000, STEP = 10, PX_PER_STEP = 4;
+
+function setAmount(v) {
+  amount = Math.max(0, Math.round(v / STEP) * STEP);
+  $('#amount').value = amount;
+  const d = $('#dial');
+  d.setAttribute('aria-valuenow', amount);
+  d.setAttribute('aria-valuetext', money(amount));
+  $('#ticks').style.transform = `translateX(${-(amount / STEP * PX_PER_STEP) % 14}px)`;
+}
+
+const dial = $('#dial');
+dial.addEventListener('pointerdown', e => {
+  dial.setPointerCapture(e.pointerId);
+  let last = e.clientX;
+  const move = ev => { setAmount(amount + (ev.clientX - last) / PX_PER_STEP * STEP); last = ev.clientX; };
+  const up = () => { dial.removeEventListener('pointermove', move); dial.removeEventListener('pointerup', up); };
+  dial.addEventListener('pointermove', move);
+  dial.addEventListener('pointerup', up);
+});
+dial.addEventListener('keydown', e => {
+  const k = { ArrowRight: STEP, ArrowUp: STEP, ArrowLeft: -STEP, ArrowDown: -STEP, PageUp: STEP * 10, PageDown: -STEP * 10 }[e.key];
+  if (k === undefined) return;
+  e.preventDefault();
+  setAmount(amount + k);
+});
+$('#amount').oninput = e => { amount = Math.max(0, Number(e.target.value) || 0); };
+
+/* ---------- категории ---------- */
+function renderCats() {
+  $('#cats').innerHTML = CATS.map(c => `
+    <button type="button" data-cat="${c.name}" style="--c:${c.color}"
+            aria-pressed="${c.name === picked}" aria-label="${c.name}">${c.icon}</button>`).join('');
+  $('#cat-name').textContent = picked;
+}
+$('#cats').onclick = e => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  picked = b.dataset.cat;
+  renderCats();
+};
+
+/* ---------- запись ---------- */
+$('#add').onsubmit = e => {
+  e.preventDefault();
+  if (!(amount > 0)) { $('#amount').focus(); return; }
+  items.push({ id: crypto.randomUUID(), amount, cat: picked, date: localDay(new Date()), note: $('#note').value.trim() });
+  save();
+  $('#note').value = '';
+  setAmount(0);
+  render();
+};
+$('#budget').onchange = e => { budget = Math.max(0, Number(e.target.value) || 0); save(); render(); };
+$('#list').onclick = e => {
+  const b = e.target.closest('.del');
+  if (!b) return;
+  items = items.filter(i => i.id !== b.dataset.id);
+  save();
+  render();
+};
+
+/* ---------- состояние месяца: цвет + реплика маскота ---------- */
+const MOUTH = {
+  good: 'M17 32c3 2.6 9 2.6 12 0',   // улыбка
+  warn: 'M17 33h12',                  // ровная линия
+  bad:  'M17 35c3-3.4 9-3.4 12 0',    // гримаса
+};
+
+function mood(spent, expected, top, topShare) {
+  if (!items.length) return ['good', 'Пока пусто — добавьте первую трату.'];
+  if (budget && spent > budget)
+    return ['bad', `Бюджет кончился, а месяц нет. Больше всех съела «${top}» — ${topShare} %.`];
+  const r = expected ? spent / expected : 0;
+  if (r > 1.4) return ['bad', `Летим намного быстрее плана. «${top}» тянет ${topShare} % расходов.`];
+  if (r > 1.2) return ['warn', `Опережаем план. Главный аппетит у «${top}» — ${topShare} %.`];
+  if (r > 0.85) return ['good', `Идём ровно по плану. «${top}» — ${topShare} % расходов.`];
+  return ['good', `Тратим экономнее плана. «${top}» — ${topShare} %, остальное скромно.`];
+}
+
+function render() {
+  const now = new Date();
+  const month = localDay(now).slice(0, 7);
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const today = now.getDate();
+
+  const mine = items.filter(i => i.date.startsWith(month));
+  const spent = mine.reduce((s, i) => s + i.amount, 0);
+  const expected = budget * today / daysInMonth;
+
+  const byCat = {};
+  for (const i of mine) byCat[i.cat] = (byCat[i.cat] || 0) + i.amount;
+  const [tc, ts] = Object.entries(byCat).sort((a, b) => b[1] - a[1])[0] || [];
+  const topShare = ts ? Math.round(ts / spent * 100) : 0;
+
+  const [state, text] = mood(spent, expected, tc, topShare);
+  document.documentElement.style.setProperty('--state', `var(--${state})`);
+  $('#quip').textContent = text;
+  $('#mouth').setAttribute('d', MOUTH[state]);
+
+  $('#month-name').textContent = now.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' }).replace(' г.', '');
+  $('#total').textContent = money(spent);
+
+  const pct = budget ? Math.round(spent / budget * 100) : 0;
+  $('#pct').textContent = pct + ' %';
+  $('#ring').setAttribute('stroke-dasharray', `${Math.min(pct, 100)} 100`);
+  $('#budget').value = budget;
+
+  $('#top-cat').textContent = tc || '—';
+  $('#top-cat').style.color = tc ? cat(tc).color : 'var(--text)';
+  $('#top-sum').textContent = tc ? `${money(ts)} · ${topShare} %` : 'нет трат';
+
+  const perDay = new Array(daysInMonth + 1).fill(0);
+  for (const i of mine) perDay[Number(i.date.slice(8, 10))] += i.amount;
+  const peak = Math.max(...perDay, 1);
+  $('#bars').innerHTML = perDay.slice(1).map((v, k) => {
+    const d = k + 1;
+    return `<i class="${v ? 'has' : ''} ${d === today ? 'today' : ''}" style="height:${Math.max(v / peak * 100, 3)}%"
+              title="${d} — ${money(v)}"></i>`;
+  }).join('');
+
+  const byDay = {};
+  for (const i of [...items].sort((a, b) => b.date.localeCompare(a.date))) (byDay[i.date] ||= []).push(i);
+  const days = Object.entries(byDay);
+  $('#list').innerHTML = days.length ? days.map(([d, list]) => `
+    <div class="day">
+      <span>${new Date(d + 'T00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}</span>
+      <b>${money(list.reduce((s, i) => s + i.amount, 0))}</b>
+    </div>
+    ${list.map(i => `<div class="tx">
+        <span class="ic" style="--c:${cat(i.cat).color}">${cat(i.cat).icon}</span>
+        <span>${esc(i.cat)}</span>
+        ${i.note ? `<span class="note">${esc(i.note)}</span>` : ''}
+        <em>${money(i.amount)}</em>
+        <button class="del" type="button" data-id="${i.id}" aria-label="Удалить: ${esc(i.cat)}, ${money(i.amount)}">✕</button>
+      </div>`).join('')}`).join('')
+    : '<div class="empty">Операций пока нет.</div>';
+}
+
+function esc(s) { return s.replace(/[<>&"]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' })[c]); }
+
+/* ---------- копия данных ---------- */
+function toast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast'; t.role = 'status'; t.textContent = msg;
+  document.body.append(t);
+  setTimeout(() => t.remove(), 3200);
+}
+
+$('#export').onclick = () => {
+  const blob = new Blob([JSON.stringify({ budget, items }, null, 1)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `traty-${localDay(new Date())}.json`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  toast(`Сохранено ${items.length} записей`);
+};
+
+$('#import-btn').onclick = () => $('#import').click();
+
+// Файл пришёл извне — проверяем каждое поле, кривые записи отбрасываем.
+$('#import').onchange = async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  e.target.value = '';
+  try {
+    const data = JSON.parse(await file.text());
+    const raw = Array.isArray(data) ? data : data.items;
+    if (!Array.isArray(raw)) throw new Error('нет списка трат');
+    const clean = [];
+    for (const r of raw) {
+      const amount = Number(r?.amount);
+      const date = String(r?.date ?? '');
+      if (!(amount > 0) || !/^\d{4}-\d{2}-\d{2}$/.test(date)) continue;
+      clean.push({
+        id: typeof r.id === 'string' && r.id ? r.id : crypto.randomUUID(),
+        amount,
+        date,
+        cat: CATS.some(c => c.name === r.cat) ? r.cat : 'Прочее',
+        note: String(r.note ?? '').slice(0, 80),
+      });
+    }
+    if (!clean.length) throw new Error('подходящих записей не нашлось');
+    const known = new Set(items.map(i => i.id));
+    const added = clean.filter(i => !known.has(i.id));
+    items = items.concat(added);
+    const b = Number(data?.budget);
+    if (b > 0) budget = b;
+    save();
+    render();
+    toast(added.length ? `Добавлено ${added.length} записей` : 'Всё это уже было записано');
+  } catch (err) {
+    toast('Файл не подошёл: ' + err.message);
+  }
+};
+
+if ('serviceWorker' in navigator) {
+  addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+}
+
+$('#dial-max').textContent = DIAL_MAX.toLocaleString('ru-RU');
+renderCats();
+setAmount(0);
+render();
+</script>
+</body>
+</html>

@@ -3,7 +3,7 @@
 Учёт личных ежедневных расходов. Одна страница, без сервера и аккаунтов:
 записи лежат в браузере устройства (localStorage).
 
-**Приложение:** https://vovamscvk-dot.github.io/Vovan/
+**Приложение:** https://vovamscvk-dot.github.io/Tratomer/
 
 ## На телефон
 

@@ -45,7 +45,10 @@ header .m::first-letter{text-transform:uppercase}
 .span2{grid-column:span 2}.span4{grid-column:span 4}
 @media (max-width:760px){
   .bento{grid-template-columns:repeat(2,1fr)}
-  .span4,.span2,.wide-sm{grid-column:span 2}
+  .span4,.span2{grid-column:span 2}
+  /* на узком экране ужимаем карточку бюджета, чтобы «из N ₽» влезало */
+  .ring{width:44px;height:44px}
+  .ringwrap{gap:8px}
 }
 
 .lbl{font:500 10px/1 var(--font);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
@@ -120,7 +123,7 @@ button{cursor:pointer}
 .budget-in{
   border:none;border-bottom:1px dashed var(--line);border-radius:0;padding:0 0 2px;
   width:6ch;max-width:100%;flex:0 1 auto;
-  font:800 .98rem/1 var(--font);font-variant-numeric:tabular-nums;text-align:right;background:none;
+  font:800 .9rem/1 var(--font);font-variant-numeric:tabular-nums;text-align:right;background:none;
 }
 .budget-in::-webkit-outer-spin-button,.budget-in::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .budget-in{-moz-appearance:textfield}
@@ -182,7 +185,7 @@ button{cursor:pointer}
     </section>
 
     <!-- бюджет -->
-    <section class="cell wide-sm">
+    <section class="cell">
       <div class="ringwrap">
         <svg class="ring" viewBox="0 0 40 40" role="img" aria-labelledby="ring-alt">
           <title id="ring-alt">Доля израсходованного бюджета</title>

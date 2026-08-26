@@ -1,2 +1,5 @@
 .DS_Store
 Thumbs.db
+
+# собранная канва — пересобирается из design/*.dc.html
+design/tratomer-audit.html

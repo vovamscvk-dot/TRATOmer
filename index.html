@@ -62,7 +62,8 @@ header .m::first-letter{text-transform:uppercase}
 .bars i.has{background:var(--state)}
 .bars i.today{outline:1px solid var(--muted);outline-offset:1px}
 
-.ringwrap{display:flex;align-items:center;gap:12px}
+.ringwrap{display:flex;align-items:center;gap:12px;min-width:0}
+.ringwrap>div{min-width:0}
 .ring{width:56px;height:56px;flex:0 0 auto}
 .ring .track{fill:none;stroke:var(--line);stroke-width:5}
 .ring .val{fill:none;stroke:var(--state);stroke-width:5;stroke-linecap:round;transition:stroke .5s ease,stroke-dasharray .5s ease}
@@ -114,8 +115,9 @@ button{cursor:pointer}
 }
 .submit:hover{background:var(--gold);color:var(--page)}
 .budget-in{
-  border:none;border-bottom:1px dashed var(--line);border-radius:0;padding:0 0 2px;width:7ch;
-  font:800 1.05rem/1 var(--font);font-variant-numeric:tabular-nums;text-align:right;background:none;
+  border:none;border-bottom:1px dashed var(--line);border-radius:0;padding:0 0 2px;
+  width:6ch;max-width:100%;flex:0 1 auto;
+  font:800 .98rem/1 var(--font);font-variant-numeric:tabular-nums;text-align:right;background:none;
 }
 .budget-in::-webkit-outer-spin-button,.budget-in::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .budget-in{-moz-appearance:textfield}
